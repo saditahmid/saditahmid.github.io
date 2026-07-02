@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YOLO Vehicle Detection — Mohammed Tahmid Hossain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f6;
+  --bg-2:#e3e9f0;
+  --card:#ffffff;
+  --ink:#1b2430;
+  --ink-soft:#5b6675;
+  --line:rgba(27,36,48,0.08);
+  --accent:#1a4a7a;
+  --accent-soft:rgba(26,74,122,0.10);
+}
+html{scroll-behavior:smooth;}
+body{
+  background:
+    radial-gradient(1100px 480px at 20% 10%, var(--accent-soft), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:var(--ink);
+  margin:0;
+  padding:0;
+}
+.nb-topbar{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(255,255,255,0.66);
+  backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid var(--line);
+}
+.nb-topbar a.nb-back{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px; letter-spacing:.02em;
+  color:var(--ink-soft); text-decoration:none;
+  display:flex; align-items:center; gap:6px;
+}
+.nb-topbar a.nb-back:hover{color:var(--accent);}
+.nb-hero{
+  max-width:880px; margin:0 auto; padding:52px 28px 8px;
+}
+.nb-eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--accent);
+  margin:0 0 10px;
+}
+.nb-hero h1{
+  font-size:32px; line-height:1.2; font-weight:700; margin:0 0 12px; color:var(--ink);
+  letter-spacing:-0.01em;
+}
+.nb-hero p.nb-sub{
+  font-size:15.5px; color:var(--ink-soft); max-width:640px; margin:0 0 4px; line-height:1.55;
+}
+.nb-meta{
+  display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 0;
+}
+.nb-tag{
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:4px 10px;
+  background:var(--accent-soft); color:var(--accent); border-radius:20px;
+  border:1px solid var(--line);
+}
+.nb-container{
+  max-width:880px; margin:28px auto 80px; padding:0 28px;
+}
+.nb-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:36px 40px 44px;
+  box-shadow:0 18px 40px -24px rgba(27,36,48,0.28);
+}
+.nb-footer{
+  max-width:880px; margin:0 auto 60px; padding:0 28px;
+  font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+}
+.nb-footer a{color:var(--accent); text-decoration:none;}
+.nb-table-wrap{overflow-x:auto; margin:18px 0 8px;}
+table.nb-results-table{
+  width:100%; border-collapse:collapse; font-size:13.5px;
+}
+table.nb-results-table th{
+  text-align:left; font-family:'JetBrains Mono',monospace; font-size:11px;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft);
+  padding:9px 14px; border-bottom:2px solid var(--line);
+}
+table.nb-results-table td{
+  padding:9px 14px; border-bottom:1px solid var(--line); color:var(--ink);
+}
+table.nb-results-table tr.nb-hl td{background:var(--accent-soft);}
+table.nb-results-table strong{color:var(--accent); font-weight:600;}
+p.nb-note{font-size:13.5px; color:var(--ink-soft); margin:10px 0 28px; line-height:1.6;}
+h2,h3{margin:28px 0 14px; color:var(--ink); font-weight:600; line-height:1.3;}
+h2{font-size:18px; margin-top:40px;}
+h3{font-size:15px; margin-top:24px;}
+ul, ol{font-size:14px; line-height:1.8; color:var(--ink); margin:15px 0; padding-left:24px;}
+li{margin:8px 0;}
+code{
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  background:var(--accent-soft); padding:2px 6px; border-radius:4px; color:var(--accent);
+}
+pre{
+  background:var(--accent-soft); padding:15px; border-radius:8px; font-family:'JetBrains Mono',monospace;
+  font-size:12px; overflow-x:auto; margin:15px 0;
+}
+.methodology-box{background:#f6faf8; padding:20px; border-radius:10px; margin:20px 0; border-left:4px solid var(--accent);}
+.methodology-box p{font-size:14px; line-height:1.8; color:var(--ink); margin:0;}
+@media (max-width:640px){
+  .nb-hero{padding:36px 18px 4px;}
+  .nb-hero h1{font-size:25px;}
+  .nb-container{padding:0 14px;}
+  .nb-card{padding:24px 20px 30px; border-radius:14px;}
+  .nb-topbar{padding:12px 16px;}
+}
+</style>
+</head>
+<body>
+<div class="nb-topbar">
+  <a class="nb-back" href="../index.html">&larr; saditahmid.github.io</a>
+  <a class="nb-back" href="../index.html" style="margin-left:auto;">Mohammed Tahmid Hossain</a>
+</div>
+
+<div class="nb-hero">
+  <p class="nb-eyebrow">Resolution Scaling · Compression · GAN Enhancement · IEEE SCOReD 2025</p>
+  <h1>YOLO Vehicle Detection: Resolution, Compression & GAN-Enhanced Evaluation</h1>
+  <p class="nb-sub">Comparative study of YOLOv8, YOLOv10, and YOLOv12 on Poribohon-BD (16 Bangladeshi vehicle classes) under resolution scaling, JPEG compression (Q50/Q75), and Real-ESRGAN restoration. Comprehensive analysis of real-world ITS degradation scenarios.</p>
+  <div class="nb-meta">
+    <span class="nb-tag">Python</span>
+    <span class="nb-tag">YOLOv8</span>
+    <span class="nb-tag">YOLOv10</span>
+    <span class="nb-tag">YOLOv12</span>
+    <span class="nb-tag">Computer Vision</span>
+    <span class="nb-tag">Real-ESRGAN</span>
+  </div>
+</div>
+
+<div class="nb-container">
+  <div class="nb-card">
+
+<h2 id="dataset">Dataset: Poribohon-BD v2</h2>
+<p>9,058 images across 16 vehicle classes from Bangladesh — the most diverse and region-representative vehicle detection benchmark for South Asia. Classes include region-specific transport modes (CNG auto-rickshaw, easy-bike, leguna, rickshaw) not present in Western benchmarks (COCO, KITTI). All images manually annotated with Pascal VOC XML; human faces blurred for privacy. Data augmentation expanded training set to 14,400 samples (900 per class) via geometric and photometric transformations.</p>
+
+<h2 id="methodology">Methodology</h2>
+<div class="methodology-box">
+<p><strong>Dataset:</strong> Poribohon-BD v2 (9,058 JPEG images, 16 vehicle classes, Pascal VOC XML annotations)</p>
+<p><strong>Preprocessing:</strong> Letterbox padding + aspect-ratio-preserving resize to 1024×1024 → augmentation (900 per class) → 14,400 total samples</p>
+<p><strong>Variants:</strong> (1) Resized to 64/128/256/512/1024px, (2) JPEG compressed (Q50/Q75), (3) GAN-enhanced with Real-ESRGAN</p>
+<p><strong>Models:</strong> YOLOv8m, YOLOv10m, YOLOv12l (identical hyperparameters for fair ablation)</p>
+<p><strong>Metrics:</strong> mAP@0.5 (IoU=0.5), mAP@0.5:0.95 (IoU 0.5–0.95, step 0.05)</p>
+<p><strong>Hardware:</strong> NVIDIA RTX 3080 (10GB), Intel i9, 64GB RAM</p>
+</div>
+
+<h2 id="results">Results & Performance Analysis</h2>
+
+<h3>Table I — Resized Dataset Performance (mAP %)</h3>
+<div class="nb-table-wrap">
+<table class="nb-results-table">
+<thead>
+<tr><th>Resolution</th><th>YOLOv8 @0.5</th><th>YOLOv8 @0.5:0.95</th><th>YOLOv10 @0.5</th><th>YOLOv10 @0.5:0.95</th><th>YOLOv12 @0.5</th><th>YOLOv12 @0.5:0.95</th></tr>
+</thead>
+<tbody>
+<tr><td>64px</td><td>60.05</td><td>40.46</td><td><strong>60.29</strong></td><td>40.21</td><td>59.53</td><td>39.59</td></tr>
+<tr><td>128px</td><td><strong>78.39</strong></td><td><strong>56.55</strong></td><td>77.76</td><td>56.04</td><td>77.77</td><td>56.10</td></tr>
+<tr><td>256px</td><td><strong>89.58</strong></td><td><strong>68.19</strong></td><td>88.96</td><td>67.41</td><td>89.34</td><td>68.12</td></tr>
+<tr><td>512px</td><td><strong>94.88</strong></td><td><strong>75.47</strong></td><td>94.27</td><td>74.84</td><td>94.55</td><td>74.71</td></tr>
+<tr class="nb-hl"><td>1024px</td><td><strong>95.37</strong></td><td><strong>75.48</strong></td><td>94.81</td><td>75.24</td><td>94.82</td><td>73.72</td></tr>
+</tbody>
+</table>
+</div>
+<p class="nb-note"><strong>Key insight:</strong> YOLOv8 dominates across nearly all resolutions. YOLOv10 edges ahead only at very low resolution (64px). Resolution is the dominant factor — mAP rises consistently from 60% at 64px to 95% at 1024px.</p>
+
+<h3>Table II — Compression & GAN-Enhanced Performance (mAP@0.5 %)</h3>
+<div class="nb-table-wrap">
+<table class="nb-results-table">
+<thead>
+<tr><th>Condition</th><th>Quality</th><th>Resolution</th><th>YOLOv8</th><th>YOLOv10</th><th>YOLOv12</th></tr>
+</thead>
+<tbody>
+<tr><td rowspan="5">JPEG Compressed</td><td>Q50</td><td>64px</td><td>57.19</td><td>56.69</td><td>56.38</td></tr>
+<tr><td>Q50</td><td>1024px</td><td>94.71</td><td>94.08</td><td>94.74</td></tr>
+<tr><td>Q75</td><td>64px</td><td>55.89</td><td>55.71</td><td>55.42</td></tr>
+<tr><td>Q75</td><td>1024px</td><td>95.33</td><td>94.60</td><td>95.06</td></tr>
+<tr class="nb-hl"><td>GAN Enhanced (Q75–1024px)</td><td>—</td><td>—</td><td><strong>95.70</strong></td><td>95.00</td><td>95.41</td></tr>
+</tbody>
+</table>
+</div>
+<p class="nb-note"><strong>Key findings:</strong> GAN enhancement helps at high resolutions (95.70% best result) but degrades at low resolutions due to hallucinated details. Compression impact is minimal at 1024px (&lt;1 point) but severe at 64px (3+ points). Low-res images lack redundancy to absorb compression loss.</p>
+
+<h2 id="findings">Key Findings</h2>
+<ul>
+<li><strong>Resolution dominates.</strong> mAP@0.5 rises from ~60% at 64px to ~95% at 1024px across all models.</li>
+<li><strong>YOLOv8 is most stable.</strong> Anchor-free head + efficient backbone deliver best/most consistent results across all degradation scenarios.</li>
+<li><strong>YOLOv10 excels at low resolution.</strong> Efficiency-focused design extracts sufficient structural patterns even at 64px (60.29% vs YOLOv8's 60.05%).</li>
+<li><strong>YOLOv12 (attention-centric) is competitive.</strong> Strong at higher resolutions with compression/GAN, but degrades at low res due to reliance on rich feature representations.</li>
+<li><strong>Compression impact scales with resolution.</strong> At 1024px, Q50 loss is &lt;1 point; at 64px, it's 3 points. Low-res images lack redundancy to absorb compression.</li>
+<li><strong>GAN helps selectively.</strong> At high resolution + compression, GAN restoration lifts mAP to 95.70% (best overall). At low res, hallucinated details confuse detector, hurting accuracy.</li>
+<li><strong>Perceptual fidelity ≠ detection accuracy.</strong> Images that look better to humans can degrade model performance; GANs optimize for visual plausibility, not machine understanding.</li>
+</ul>
+
+<h2 id="architecture">YOLO Model Architectures</h2>
+<div class="nb-table-wrap">
+<table class="nb-results-table">
+<thead>
+<tr><th>Model</th><th>Key Innovation</th><th>Strength</th><th>Weakness</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>YOLOv8</strong></td><td>Anchor-free head, optimized backbone</td><td>Balanced speed/accuracy, robust to compression</td><td>—</td></tr>
+<tr><td><strong>YOLOv10</strong></td><td>NMS-free (dual assignment), lightweight</td><td>Excellent at low resolution &amp; efficiency</td><td>Reduced localization precision at high IoU</td></tr>
+<tr class="nb-hl"><td><strong>YOLOv12</strong></td><td>Attention-centric, richer features</td><td>Strong at high res + compression</td><td>Relies on fine-grained features; struggles at 64px</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="ablations">Ablation & Insights</h2>
+<p><strong>Resolution ablation:</strong> Confirms mAP saturates around 512–1024px for Poribohon-BD. Moving from 256→512px yields +5–6 mAP points; 512→1024px yields +1–2 points. Practical threshold likely 512px for real-world intelligent transportation systems (ITS).</p>
+<p><strong>Compression ablation:</strong> Q50 vs Q75 shows diminishing returns; both degrade low-res severely. Q75 acceptable at mid-resolution (256+ px).</p>
+<p><strong>GAN ablation:</strong> Real-ESRGAN x4plus helps only when base signal is present. Scaling 64px→256px via GAN then detecting ≈ detecting native 256px (slight overfitting to hallucinations observed at 64px).</p>
+
+<h2 id="cite">Citation</h2>
+<pre>@inproceedings{meem2025resolution,
+  title={Resolution, Compression, and GAN-Enhanced Evaluation of YOLO Models on the Poribohon-BD Vehicle Dataset},
+  author={Meem, Sabrina Masum and Hossain, Mohammed Tahmid and Rashid, Sami and Islam, Ashraful and Rahman, Rashedur and Ahmed, Istiaq and Mahmud, Asif and Alam, Saadia Binte and Amin, M Ashraful},
+  booktitle={2025 IEEE 23rd Student Conference on Research and Development (SCOReD)},
+  pages={1--6},
+  year={2025},
+  organization={IEEE}
+}</pre>
+
+  </div>
+</div>
+
+<div class="nb-footer">
+  <span>Full analysis · reproducible notebook on <a href="https://github.com/saditahmid/yolo-poribohon-bd-evaluation">GitHub</a></span>
+  <a href="../index.html">&larr; back to projects</a>
+</div>
+
+</body>
+</html>
